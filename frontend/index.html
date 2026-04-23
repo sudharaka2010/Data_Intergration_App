@@ -1,0 +1,286 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DATAC – Auto Validate Data Program</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="./assets/css/styles.css"/>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading-screen">
+  <div class="ldr-name">DATAC</div>
+  <div class="ldr-sub">Auto Validate Data Program</div>
+  <div class="ldr-bar-wrap"><div class="ldr-bar"></div></div>
+  <div class="ldr-dots"><div class="ldr-dot"></div><div class="ldr-dot"></div><div class="ldr-dot"></div></div>
+</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lg-card">
+    <div class="lg-brand">
+      <div class="lg-name">DATAC</div>
+      <div class="lg-sub">Auto Validate Data Program</div>
+    </div>
+    <div class="lg-form">
+      <div class="lg-group">
+        <label class="lg-label">Username or Email</label>
+        <input class="lg-input" type="text" id="lu" placeholder="admin@datac.io" autocomplete="username"/>
+      </div>
+      <div class="lg-group">
+        <label class="lg-label">Password</label>
+        <input class="lg-input" type="password" id="lp" placeholder="••••••••" autocomplete="current-password"/>
+        <div class="lg-err" id="lg-err">Incorrect credentials. Please try again.</div>
+      </div>
+      <button class="lg-btn" id="lg-btn" onclick="doLogin()">
+        <span id="lg-btxt">Sign in</span>
+        <div class="lg-spin" id="lg-spin"></div>
+      </button>
+    </div>
+    <div class="lg-hint">Demo — user: <b style="color:var(--text2)">admin</b> / pass: <b style="color:var(--text2)">datac123</b></div>
+  </div>
+</div>
+
+<!-- OVERLAY -->
+<div id="overlay">
+  <div class="ov-box">
+    <div class="ov-spin"></div>
+    <div class="ov-lbl" id="ov-lbl">Processing…</div>
+    <div class="ov-step" id="ov-step"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><div class="td" id="td"></div><span id="tmsg"></span></div>
+
+<!-- APP -->
+<div id="app">
+  <header class="header">
+    <div>
+      <div class="brand-name">DATAC</div>
+      <div class="brand-sub">Auto Validate Data Program</div>
+    </div>
+    <div class="hdr-right">
+      <div class="user-badge">
+        <div class="user-avatar" id="hdr-av">AD</div>
+        <span class="user-name" id="hdr-un">admin</span>
+      </div>
+      <button class="hdr-btn" title="New session" onclick="newSession()">+</button>
+      <button class="logout-btn" onclick="doLogout()">Logout</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- TOP ROW -->
+    <div class="top-row">
+      <!-- Supplier -->
+      <div class="card">
+        <div class="card-title">Supplier Details</div>
+        <div class="upload-grid">
+          <div>
+            <div class="f-label">Upload CSV</div>
+            <div class="drop-zone" id="sup-dz">
+              <input type="file" accept=".csv,.xlsx" id="sup-file" onchange="onFile('sup')"/>
+              <div class="drop-inner">
+                <div class="drop-icon">↑</div>
+                <span class="drop-name empty" id="sup-fn">No file chosen</span>
+              </div>
+            </div>
+            <div class="prog-wrap" id="sup-pw"><div class="prog-bar" id="sup-pb"></div></div>
+            <div class="status-row"><div class="s-dot" id="sup-sd"></div><span class="s-msg" id="sup-sm"></span></div>
+          </div>
+          <div>
+            <div class="f-label">Market</div>
+            <select class="sel-field" id="sup-mkt">
+              <option value="">— Select —</option>
+            </select>
+            <div class="helper">Manually or select add to market as by country name</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="clearUp('sup')">Clear</button>
+          <button class="btn btn-solid" id="sup-upbtn" onclick="doUpload('sup')">
+            <span>Upload</span><div class="mspin" id="sup-ms"></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Target -->
+      <div class="card">
+        <div class="card-title">Target Market Details</div>
+        <div class="upload-grid">
+          <div>
+            <div class="f-label">Upload CSV</div>
+            <div class="drop-zone" id="tgt-dz">
+              <input type="file" accept=".csv,.xlsx" id="tgt-file" onchange="onFile('tgt')"/>
+              <div class="drop-inner">
+                <div class="drop-icon">↑</div>
+                <span class="drop-name empty" id="tgt-fn">No file chosen</span>
+              </div>
+            </div>
+            <div class="prog-wrap" id="tgt-pw"><div class="prog-bar" id="tgt-pb"></div></div>
+            <div class="status-row"><div class="s-dot" id="tgt-sd"></div><span class="s-msg" id="tgt-sm"></span></div>
+          </div>
+          <div>
+            <div class="f-label">Market</div>
+            <select class="sel-field" id="tgt-mkt">
+              <option value="">— Select —</option>
+            </select>
+            <div class="helper">Manually or select add to market as by country name</div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="clearUp('tgt')">Clear</button>
+          <button class="btn btn-solid" id="tgt-upbtn" onclick="doUpload('tgt')">
+            <span>Upload</span><div class="mspin" id="tgt-ms"></div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW COLUMNS -->
+    <div class="preview-card">
+      <div class="card-title">Preview Columns</div>
+      <div class="preview-layout">
+        <div class="ftree">
+          <div class="ftree-section">
+            <div class="ftree-label">Files</div>
+          </div>
+          <div class="ftree-section">
+            <div class="ftree-label">Supplier Details</div>
+            <div id="ft-sup"><div class="ftree-empty">No files uploaded</div></div>
+          </div>
+          <div class="ftree-section">
+            <div class="ftree-label">Target Market</div>
+            <div id="ft-tgt"><div class="ftree-empty">No files uploaded</div></div>
+          </div>
+        </div>
+
+        <div class="cols-outer">
+          <div class="cols-grid">
+            <!-- Supplier -->
+            <div class="cg">
+              <div class="cg-head">Supplier Column Lists</div>
+              <div class="cg-sub" id="sup-cl-sub">—</div>
+              <div class="cg-list" id="cl-sup">
+                <div class="cg-empty"><div class="cg-empty-icon">+</div><div class="cg-empty-txt">Upload supplier CSV</div></div>
+              </div>
+              <div class="cg-foot" id="sup-cf" style="display:none">
+                <button class="btn btn-solid" style="padding:5px;font-size:11px;justify-content:center" onclick="doPrev('sup')">Preview</button>
+                <div class="cg-foot-status" id="sup-cfs" style="display:none">Status – successfully save CSV</div>
+                <a class="cg-foot-link" id="sup-cfl" style="display:none" href="#" target="_blank" rel="noopener">Download Here – <span id="sup-cfn"></span></a>
+              </div>
+            </div>
+
+            <!-- Target -->
+            <div class="cg">
+              <div class="cg-head">Target Market Details</div>
+              <div class="cg-sub" id="tgt-cl-sub">—</div>
+              <div class="cg-list" id="cl-tgt">
+                <div class="cg-empty"><div class="cg-empty-icon">+</div><div class="cg-empty-txt">Upload target market CSV</div></div>
+              </div>
+              <div class="cg-foot" id="tgt-cf" style="display:none">
+                <button class="btn btn-solid" style="padding:5px;font-size:11px;justify-content:center" onclick="doPrev('tgt')">Preview</button>
+                <div class="cg-foot-status" id="tgt-cfs" style="display:none">Status – successfully save CSV</div>
+                <a class="cg-foot-link" id="tgt-cfl" style="display:none" href="#" target="_blank" rel="noopener">Download Here – <span id="tgt-cfn"></span></a>
+              </div>
+            </div>
+
+            <!-- Arrow -->
+            <div class="arrow-col"><span style="font-size:14px;color:var(--text3)">→</span></div>
+
+            <!-- Merged -->
+            <div class="cg">
+              <div class="cg-head">Selected market → new supplier</div>
+              <div class="cg-sub" id="new-cl-sub">—</div>
+              <div class="cg-list" id="cl-new">
+                <div class="cg-empty"><div class="cg-empty-icon">+</div><div class="cg-empty-txt">Upload both CSVs first</div></div>
+              </div>
+              <div class="cg-foot" id="new-cf" style="display:none">
+                <button class="btn btn-solid" style="padding:5px;font-size:11px;justify-content:center" onclick="doPrev('new')">Preview</button>
+                <div class="cg-foot-status" id="new-cfs" style="display:none">Status – successfully save CSV</div>
+                <a class="cg-foot-link" id="new-cfl" style="display:none" href="#" target="_blank" rel="noopener">Download Here – <span id="new-cfn"></span></a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SELECT BAR -->
+    <div class="select-bar">
+      <div class="sb-g">
+        <label class="sb-lbl">Select Column by Name</label>
+        <select class="sb-sel" id="sb-cname" disabled><option>—</option></select>
+      </div>
+      <div class="sb-g">
+        <label class="sb-lbl">Select Name Box</label>
+        <select class="sb-sel" id="sb-box" disabled>
+          <option>A1</option><option selected>D3</option><option>B2</option><option>E5</option>
+        </select>
+      </div>
+      <div class="sb-g">
+        <label class="sb-lbl">Select Column by Alphabetic</label>
+        <select class="sb-sel" id="sb-alpha" disabled onchange="updateSheet()">
+          <option>A</option><option>B</option><option>C</option><option selected>D</option>
+          <option>E</option><option>F</option><option>G</option><option>H</option>
+          <option>I</option><option>J</option><option>K</option><option>L</option><option>M</option><option>N</option>
+        </select>
+      </div>
+      <div class="sb-g">
+        <label class="sb-lbl">Select Row</label>
+        <select class="sb-sel" id="sb-row" disabled onchange="updateSheet()">
+          <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option selected>23</option>
+        </select>
+      </div>
+      <div class="sb-g">
+        <button class="tr-btn" id="tr-btn" disabled onclick="doTranslate()">Translate to</button>
+        <div class="tr-hint" id="tr-hint">Upload CSV to detect language</div>
+      </div>
+      <div class="sb-g">
+        <label class="sb-lbl">Select Language</label>
+        <select class="sb-sel" id="sb-lang" disabled>
+          <option>English</option><option>German</option><option>French</option><option>Spanish</option>
+        </select>
+      </div>
+      <div class="act-col">
+        <button class="act-btn" id="sel-btn" disabled onclick="applyCurrentSelection()">Select</button>
+        <label class="chk-row"><input type="checkbox" id="no-r1" checked onchange="updateSheet()"/> Without row 1</label>
+      </div>
+      <div class="act-col">
+        <button class="act-btn" id="save-btn" disabled onclick="doSave()">Save</button>
+      </div>
+    </div>
+
+    <!-- SPREADSHEET -->
+    <div class="sheet-panel">
+      <div class="sheet-title-row">
+        <div>
+          <div class="card-title sheet-title">Editable Data Preview</div>
+          <div class="sheet-note">Click any cell to edit. Use the controls above to select a column and row.</div>
+        </div>
+        <div class="sheet-badge" id="edit-count">0 edits</div>
+      </div>
+      <div class="sheet-wrap">
+        <div class="sheet-empty" id="sh-empty">
+          <div class="se-icon">⬡</div>
+          <div class="se-txt">Upload a Supplier CSV and a Target Market CSV<br>then click <b style="color:var(--text2)">Upload</b> to preview data</div>
+        </div>
+        <div id="sh-loaded" style="display:none">
+          <div class="sheet-scroll">
+            <table class="sh"><thead id="sh-head"></thead><tbody id="sh-body"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="./assets/js/app.js"></script>
+</body>
+</html>
+

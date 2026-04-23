@@ -1,0 +1,2 @@
+-- PostgreSQL is created by Docker Compose.
+-- Application tables are created automatically by the FastAPI backend on startup.
